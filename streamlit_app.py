@@ -122,12 +122,19 @@ if message_count < 20:
                 "temperature": 0.7,  # Slightly creative but still focused
                 "stream": True
             }
-            
+# Define the payload BEFORE the try block
+data = {
+    "model": "deepseek-chat",  # or whatever your model is
+    "messages": api_messages,
+    "max_tokens": 500,
+    "temperature": 0.7,
+    "stream": True
+}            
             # Make the API request with streaming
            # Make the API request with streaming
 try:
     with requests.post(api_url, headers=headers, json=data, stream=True) as r:
-        if r.status_code != 200:
+            if r.status_code != 200:
             st.error(f"Error: {r.status_code} - {r.text}")
         else:
             # Process the streaming response
