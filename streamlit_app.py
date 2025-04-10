@@ -135,7 +135,7 @@ data = {
 try:
     with requests.post(api_url, headers=headers, json=data, stream=True) as r:
             if r.status_code != 200:
-            st.error(f"Error: {r.status_code} - {r.text}")
+                st.error(f"Error: {r.status_code} - {r.text}")
         else:
             # Process the streaming response
             for line in r.iter_lines():
