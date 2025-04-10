@@ -106,22 +106,22 @@ data = {
     "stream": True
 }
 
-    try:
-        with requests.post(api_url, headers=headers, json=data, stream=True) as r:
-            if r.status_code != 200:
-                st.error(f"Error: {r.status_code} - {r.text}")
-            else:
-                for line in r.iter_lines():
-                    if line:
-                        line_text = line.decode("utf-8")
-                        if line_text.startswith("data: ") and line_text != "data: [DONE]":
-                            json_str = line_text[6:]
-                            try:
-                                chunk = json.loads(json_str)
-                                content = chunk["choices"][0].get("delta", {}).get("content")
-                                if content is not None:
-                                    full_response += content
-                                    message_placeholder.markdown(clean_response(full_response))
+try:
+    with requests.post(api_url, headers=headers, json=data, stream=True) as r:
+        if r.status_code != 200:
+            st.error(f"Error: {r.status_code} - {r.text}")
+        else:
+            for line in r.iter_lines():
+                if line:
+                    line_text = line.decode("utf-8")
+                    if line_text.startswith("data: ") and line_text != "data: [DONE]":
+                        json_str = line_text[6:]
+                        try:
+                            chunk = json.loads(json_str)
+                            content = chunk["choices"][0].get("delta", {}).get("content")
+                            if content is not None:
+                                full_response += content
+                                message_placeholder.markdown(clean_response(full_response))
                             except json.JSONDecodeError:
                                 continue
 
