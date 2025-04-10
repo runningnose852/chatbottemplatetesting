@@ -98,13 +98,13 @@ api_messages = [{"role": "system", "content": feedback_system_message}] + [
     for m in st.session_state.messages
 ]    
 
-    data = {
-        "model": "deepseek-chat",
-        "messages": api_messages,
-        "max_tokens": 1000,  # Increased to allow longer output
-        "temperature": 0.7,
-        "stream": True
-    }
+data = {
+    "model": "deepseek-chat",
+    "messages": api_messages,
+    "max_tokens": 1000,  # Increased to allow longer output
+    "temperature": 0.7,
+    "stream": True
+}
 
     try:
         with requests.post(api_url, headers=headers, json=data, stream=True) as r:
