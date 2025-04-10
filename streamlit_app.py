@@ -136,9 +136,9 @@ with st.chat_message("assistant"):
         st.session_state.messages.append({"role": "assistant", "content": error_message})
 
 
-else:
-    st.info("This conversation has reached its message limit. Please reset to continue chatting.")
-    if st.button("Reset Conversation"):
-        st.session_state.messages = []
-        st.session_state.messages.append({"role": "assistant", "content": initial_message})
-        st.rerun()
+    else:
+        st.info("This conversation has reached its message limit. Please reset to continue chatting.")
+        if st.button("Reset Conversation"):
+            st.session_state.messages = []
+            st.session_state.messages.append({"role": "assistant", "content": initial_message})
+            st.rerun()
