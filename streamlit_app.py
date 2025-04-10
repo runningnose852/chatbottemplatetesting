@@ -90,14 +90,13 @@ if message_count < 20:
         with st.chat_message("user"):
             st.markdown(truncated_prompt)
 
-        api_messages = [{"role": "system", "content": feedback_system_message}] + [
-            {"role": m["role"], "content": m["content"]}
-            for m in st.session_state.messages
-        ]
-
 with st.chat_message("assistant"):
     message_placeholder = st.empty()
     full_response = ""
+api_messages = [{"role": "system", "content": feedback_system_message}] + [
+    {"role": m["role"], "content": m["content"]}
+    for m in st.session_state.messages
+]    
 
     data = {
         "model": "deepseek-chat",
