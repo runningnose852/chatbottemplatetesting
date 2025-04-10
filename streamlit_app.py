@@ -124,43 +124,41 @@ if message_count < 20:
             }
             
             # Make the API request with streaming
-            try:
-      with requests.post(api_url, headers=headers, json=data, stream=True) as r:
-    if r.status_code != 200:
-        st.error(f"Error: {r.status_code} - {r.text}")
-    else:
-        # Process the streaming response
-        for line in r.iter_lines():
-            if line:
-                line_text = line.decode("utf-8")
-                if line_text.startswith("data: ") and line_text != "data: [DONE]":
-                    json_str = line_text[6:]
-                    try:
-                        chunk = json.loads(json_str)
-                        content = chunk["choices"][0].get("delta", {}).get("content")
-                        if content is not None:
-                            full_response += content
-                            display_response = truncate_to_word_limit(full_response)
-                            message_placeholder.markdown(clean_response(display_response) + "▌")
-                    except json.JSONDecodeError:
-                        continue
+           # Make the API request with streaming
+try:
+    with requests.post(api_url, headers=headers, json=data, stream=True) as r:
+        if r.status_code != 200:
+            st.error(f"Error: {r.status_code} - {r.text}")
+        else:
+            # Process the streaming response
+            for line in r.iter_lines():
+                if line:
+                    line_text = line.decode("utf-8")
+                    if line_text.startswith("data: ") and line_text != "data: [DONE]":
+                        json_str = line_text[6:]
+                        try:
+                            chunk = json.loads(json_str)
+                            content = chunk["choices"][0].get("delta", {}).get("content")
+                            if content is not None:
+                                full_response += content
+                                display_response = truncate_to_word_limit(full_response)
+                                message_placeholder.markdown(clean_response(display_response) + "▌")
+                        except json.JSONDecodeError:
+                            continue
 
-                        
-                        # Truncate the final response if it's over the limit
-                        final_response = truncate_to_word_limit(full_response)
-                        if final_response != full_response:
-                            st.info("The assistant's response was truncated to 300 words.")
-                        
-                        # Update the placeholder with the final response
-                        message_placeholder.write(final_response)
-                        
-                        # Store the truncated response
-                        st.session_state.messages.append({"role": "assistant", "content": final_response})
-            except Exception as e:
-                st.error(f"Error connecting to DeepSeek API: {str(e)}")
-                error_message = "Sorry, I encountered an error trying to generate a response."
-                message_placeholder.markdown(error_message)
-                st.session_state.messages.append({"role": "assistant", "content": error_message})
+    # Final response (after streaming ends)
+    final_response = truncate_to_word_limit(full_response)
+    if final_response != full_response:
+        st.info("The assistant's response was truncated to 300 words.")
+    message_placeholder.markdown(clean_response(final_response))
+    st.session_state.messages.append({"role": "assistant", "content": final_response})
+
+except Exception as e:
+    st.error(f"Error connecting to DeepSeek API: {str(e)}")
+    error_message = "Sorry, I encountered an error trying to generate a response."
+    message_placeholder.markdown(error_message)
+    st.session_state.messages.append({"role": "assistant", "content": error_message})
+
 else:
     # Show a message when the chat is full
     st.info("This conversation has reached its message limit. Please reset to continue chatting.")
