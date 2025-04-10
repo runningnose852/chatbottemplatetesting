@@ -4,9 +4,9 @@ import json
 import re
 
 # Show title and description
-st.title("💬 DeepSeek Chatbot")
+st.title("💬 Paraphrasing Feedback Assistant")
 st.write(
-    "This is a simple chatbot that uses DeepSeek's language model to generate responses. "
+    "This chatbot helps with paraphrasing tasks and provides constructive feedback to improve your writing. "
     "The conversation is limited to 20 messages (10 exchanges), with each response limited to 300 words."
 )
 
@@ -37,9 +37,30 @@ def truncate_to_word_limit(text, limit=300):
     # Add ellipsis to indicate truncation
     return truncated_text + "..."
 
+# System message to instruct the model to provide feedback
+feedback_system_message = """You are a helpful writing assistant that specializes in providing constructive feedback on paraphrasing tasks.
+When reviewing a student's paraphrased text:
+1. Assess how well they've maintained the original meaning
+2. Evaluate their use of different sentence structures and vocabulary
+3. Highlight specific strengths in their paraphrasing
+4. Provide constructive suggestions for improvement
+5. Rate their paraphrasing on a scale of 1-5 stars
+6. If requested, provide an example of how a specific part could be improved
+
+Be encouraging but honest. Focus on helping the student improve their paraphrasing skills."""
+
 # Create a session state variable to store the chat messages
 if "messages" not in st.session_state:
     st.session_state.messages = []
+    
+    # Add the initial paraphrasing task message from the assistant
+    initial_message = """**Paraphrasing Task:** Read the paragraph below and rewrite it in your own words. Try to maintain the original meaning, but use different sentence structures and vocabulary.
+
+**Original Paragraph:** *In today's fast-paced world, technology plays a crucial role in almost every aspect of our lives. From communication and transportation to healthcare and education, advancements in technology have significantly improved the way we live and work. However, while these innovations offer many benefits, they also raise concerns about privacy, job displacement, and the overreliance on digital tools. It is important for individuals and societies to find a balance between embracing technology and maintaining control over how it affects our daily lives.*
+
+Submit your paraphrased version below, and I'll provide constructive feedback to help you improve."""
+    
+    st.session_state.messages.append({"role": "assistant", "content": initial_message})
 
 # Display message count and limit warning if approaching limit
 message_count = len(st.session_state.messages)
@@ -60,7 +81,7 @@ for message in st.session_state.messages:
 
 # Create a chat input field - only if under the message limit
 if message_count < 20:
-    if prompt := st.chat_input("What is up?"):
+    if prompt := st.chat_input("Enter your paraphrased version..."):
         # Truncate user input if over 300 words
         truncated_prompt = truncate_to_word_limit(prompt)
         if truncated_prompt != prompt:
@@ -71,8 +92,10 @@ if message_count < 20:
         with st.chat_message("user"):
             st.markdown(truncated_prompt)
         
-        # Prepare messages for the API request
+        # Prepare messages for the API request, including the system message
         api_messages = [
+            {"role": "system", "content": feedback_system_message}
+        ] + [
             {"role": m["role"], "content": m["content"]}
             for m in st.session_state.messages
         ]
@@ -83,11 +106,12 @@ if message_count < 20:
             message_placeholder = st.empty()
             full_response = ""
             
-            # Set up the API request data with max tokens limit to help ensure response is not too long
+            # Set up the API request data with max tokens limit
             data = {
                 "model": "deepseek-chat",  # Replace with the appropriate DeepSeek model
                 "messages": api_messages,
                 "max_tokens": 500,  # Approximate limit to help stay under 300 words
+                "temperature": 0.7,  # Slightly creative but still focused
                 "stream": True
             }
             
@@ -137,3 +161,9 @@ else:
     if st.button("Reset Conversation"):
         st.session_state.messages = []
         st.experimental_rerun()
+
+# Add a reset button at the bottom of the app for convenience
+st.sidebar.title("Options")
+if st.sidebar.button("Start New Paraphrasing Task"):
+    st.session_state.messages = []
+    st.experimental_rerun()
