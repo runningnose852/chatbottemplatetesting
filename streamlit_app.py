@@ -49,6 +49,11 @@ When reviewing a student's paraphrased text:
 
 Be encouraging but honest. Focus on helping the student improve their paraphrasing skills."""
 
+# Add a reset button at the top of the app
+if st.button("Start New Paraphrasing Task"):
+    st.session_state.messages = []
+    st.rerun()  # Using st.rerun() instead of experimental_rerun()
+
 # Create a session state variable to store the chat messages
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -72,7 +77,7 @@ elif message_count >= 20:
     # Add a reset button
     if st.button("Reset Conversation"):
         st.session_state.messages = []
-        st.experimental_rerun()
+        st.rerun()  # Using st.rerun() instead of experimental_rerun()
 
 # Display the existing chat messages
 for message in st.session_state.messages:
@@ -160,10 +165,4 @@ else:
     st.info("This conversation has reached its message limit. Please reset to continue chatting.")
     if st.button("Reset Conversation"):
         st.session_state.messages = []
-        st.experimental_rerun()
-
-# Add a reset button at the bottom of the app for convenience
-st.sidebar.title("Options")
-if st.sidebar.button("Start New Paraphrasing Task"):
-    st.session_state.messages = []
-    st.experimental_rerun()
+        st.rerun()  # Using st.rerun() instead of experimental_rerun()
