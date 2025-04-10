@@ -125,31 +125,26 @@ if message_count < 20:
             
             # Make the API request with streaming
             try:
-                with requests.post(api_url, headers=headers, json=data, stream=True) as r:
-                    if r.status_code != 200:
-                        st.error(f"Error: {r.status_code} - {r.text}")
-                    else:
-                        # Process the streaming response
-                        for line in r.iter_lines():
-                            if line:
-                                line_text = line.decode('utf-8')
-                                # Skip the "data: " prefix and empty lines
-                                if line_text.startswith("data: ") and line_text != "data: [DONE]":
-                                    json_str = line_text[6:]  # Remove "data: " prefix
-                                    try:
-                                        chunk = json.loads(json_str)
-                                        if "choices" in chunk and len(chunk["choices"]) > 0:
-                                       content = chunk["choices"][0].get("delta", {}).get("content")
-                                            if content is not None:
-                                                full_response += content
-                                                display_response = truncate_to_word_limit(full_response)
-                                                message_placeholder.markdown(clean_response(display_response) + "▌")
+      with requests.post(api_url, headers=headers, json=data, stream=True) as r:
+    if r.status_code != 200:
+        st.error(f"Error: {r.status_code} - {r.text}")
+    else:
+        # Process the streaming response
+        for line in r.iter_lines():
+            if line:
+                line_text = line.decode("utf-8")
+                if line_text.startswith("data: ") and line_text != "data: [DONE]":
+                    json_str = line_text[6:]
+                    try:
+                        chunk = json.loads(json_str)
+                        content = chunk["choices"][0].get("delta", {}).get("content")
+                        if content is not None:
+                            full_response += content
+                            display_response = truncate_to_word_limit(full_response)
+                            message_placeholder.markdown(clean_response(display_response) + "▌")
+                    except json.JSONDecodeError:
+                        continue
 
-                                                # Display maximum 300 words as we go
-                                                display_response = truncate_to_word_limit(full_response)
-                                                message_placeholder.write(display_response + "▌")
-                                    except json.JSONDecodeError:
-                                        continue
                         
                         # Truncate the final response if it's over the limit
                         final_response = truncate_to_word_limit(full_response)
