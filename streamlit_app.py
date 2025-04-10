@@ -52,7 +52,7 @@ Be encouraging but honest. Focus on helping the student improve their paraphrasi
 # Initial paraphrasing task message
 initial_message = """**Paraphrasing Task:** Please read the paragraph below and rewrite it in your own words. Try to maintain the original meaning, but use different sentence structures and vocabulary.
 
-**Original Paragraph:** *In today's fast-paced world, technology plays a crucial role in almost every aspect of our lives. From communication and transportation to healthcare and education, advancements in technology have significantly improved the way we live and work. However, while these innovations offer many benefits, they also raise concerns about privacy, job displacement, and the overreliance on digital tools. It is important for individuals and societies to find a balance between embracing technology and maintaining control over how it affects our daily lives.*
+**Original Paragraph:** *In today's fast-paced world, technology plays a crucial role in almost every aspect of our lives. From communication and transportation to healthcare and education, advancements in technology have significantly improved the way we live and work. However, while these innovations offer many benefits, they also raise concerns about privacy, job displacement, and the overreliance on digital tools. It is important for individuals and societies to find a balance between embracing techn...
 
 Submit your paraphrased version below, and I'll provide constructive feedback to help you improve."""
 
@@ -90,54 +90,54 @@ if message_count < 20:
         with st.chat_message("user"):
             st.markdown(truncated_prompt)
 
-with st.chat_message("assistant"):
-    message_placeholder = st.empty()
-    full_response = ""
-api_messages = [{"role": "system", "content": feedback_system_message}] + [
-    {"role": m["role"], "content": m["content"]}
-    for m in st.session_state.messages
-]    
+        with st.chat_message("assistant"):
+            message_placeholder = st.empty()
+            full_response = ""
 
-data = {
-    "model": "deepseek-chat",
-    "messages": api_messages,
-    "max_tokens": 1000,  # Increased to allow longer output
-    "temperature": 0.7,
-    "stream": True
-}
+            api_messages = [{"role": "system", "content": feedback_system_message}] + [
+                {"role": m["role"], "content": m["content"]}
+                for m in st.session_state.messages
+            ]
 
-try:
-    with requests.post(api_url, headers=headers, json=data, stream=True) as r:
-        if r.status_code != 200:
-            st.error(f"Error: {r.status_code} - {r.text}")
-        else:
-            for line in r.iter_lines():
-                if line:
-                    line_text = line.decode("utf-8")
-                    if line_text.startswith("data: ") and line_text != "data: [DONE]":
-                        json_str = line_text[6:]
-                        try:
-                            chunk = json.loads(json_str)
-                            content = chunk["choices"][0].get("delta", {}).get("content")
-                            if content is not None:
-                                full_response += content
-                                message_placeholder.markdown(clean_response(full_response))
-                            except json.JSONDecodeError:
-                                continue
+            data = {
+                "model": "deepseek-chat",
+                "messages": api_messages,
+                "max_tokens": 1000,
+                "temperature": 0.7,
+                "stream": True
+            }
 
-        message_placeholder.markdown(clean_response(full_response))
-        st.session_state.messages.append({"role": "assistant", "content": full_response})
+            try:
+                with requests.post(api_url, headers=headers, json=data, stream=True) as r:
+                    if r.status_code != 200:
+                        st.error(f"Error: {r.status_code} - {r.text}")
+                    else:
+                        for line in r.iter_lines():
+                            if line:
+                                line_text = line.decode("utf-8")
+                                if line_text.startswith("data: ") and line_text != "data: [DONE]":
+                                    json_str = line_text[6:]
+                                    try:
+                                        chunk = json.loads(json_str)
+                                        content = chunk["choices"][0].get("delta", {}).get("content")
+                                        if content is not None:
+                                            full_response += content
+                                            message_placeholder.markdown(clean_response(full_response))
+                                    except json.JSONDecodeError:
+                                        continue
 
-    except Exception as e:
-        st.error(f"Error connecting to DeepSeek API: {str(e)}")
-        error_message = "Sorry, I encountered an error trying to generate a response."
-        message_placeholder.markdown(error_message)
-        st.session_state.messages.append({"role": "assistant", "content": error_message})
+                message_placeholder.markdown(clean_response(full_response))
+                st.session_state.messages.append({"role": "assistant", "content": full_response})
 
+            except Exception as e:
+                st.error(f"Error connecting to DeepSeek API: {str(e)}")
+                error_message = "Sorry, I encountered an error trying to generate a response."
+                message_placeholder.markdown(error_message)
+                st.session_state.messages.append({"role": "assistant", "content": error_message})
 
-    else:
-        st.info("This conversation has reached its message limit. Please reset to continue chatting.")
-        if st.button("Reset Conversation"):
-            st.session_state.messages = []
-            st.session_state.messages.append({"role": "assistant", "content": initial_message})
-            st.rerun()
+else:
+    st.info("This conversation has reached its message limit. Please reset to continue chatting.")
+    if st.button("Reset Conversation"):
+        st.session_state.messages = []
+        st.session_state.messages.append({"role": "assistant", "content": initial_message})
+        st.rerun()
