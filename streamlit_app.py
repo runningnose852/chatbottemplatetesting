@@ -49,22 +49,20 @@ When reviewing a student's paraphrased text:
 
 Be encouraging but honest. Focus on helping the student improve their paraphrasing skills."""
 
-# Add a reset button at the top of the app
-if st.button("Start New Paraphrasing Task"):
-    st.session_state.messages = []
-    st.rerun()  # Using st.rerun() instead of experimental_rerun()
-
-# Create a session state variable to store the chat messages
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-    
-    # Add the initial paraphrasing task message from the assistant
-    initial_message = """**Paraphrasing Task:** Read the paragraph below and rewrite it in your own words. Try to maintain the original meaning, but use different sentence structures and vocabulary.
+# Initial paraphrasing task message
+initial_message = """**Paraphrasing Task:** Read the paragraph below and rewrite it in your own words. Try to maintain the original meaning, but use different sentence structures and vocabulary.
 
 **Original Paragraph:** *In today's fast-paced world, technology plays a crucial role in almost every aspect of our lives. From communication and transportation to healthcare and education, advancements in technology have significantly improved the way we live and work. However, while these innovations offer many benefits, they also raise concerns about privacy, job displacement, and the overreliance on digital tools. It is important for individuals and societies to find a balance between embracing technology and maintaining control over how it affects our daily lives.*
 
 Submit your paraphrased version below, and I'll provide constructive feedback to help you improve."""
-    
+
+# Create a session state variable to store the chat messages
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+    # Add the initial message only if the messages list is empty
+    st.session_state.messages.append({"role": "assistant", "content": initial_message})
+elif len(st.session_state.messages) == 0:
+    # Make sure the initial message is always present if messages list exists but is empty
     st.session_state.messages.append({"role": "assistant", "content": initial_message})
 
 # Display message count and limit warning if approaching limit
@@ -77,7 +75,9 @@ elif message_count >= 20:
     # Add a reset button
     if st.button("Reset Conversation"):
         st.session_state.messages = []
-        st.rerun()  # Using st.rerun() instead of experimental_rerun()
+        # Re-add the initial message immediately after reset
+        st.session_state.messages.append({"role": "assistant", "content": initial_message})
+        st.rerun()
 
 # Display the existing chat messages
 for message in st.session_state.messages:
@@ -165,4 +165,6 @@ else:
     st.info("This conversation has reached its message limit. Please reset to continue chatting.")
     if st.button("Reset Conversation"):
         st.session_state.messages = []
-        st.rerun()  # Using st.rerun() instead of experimental_rerun()
+        # Re-add the initial message immediately after reset
+        st.session_state.messages.append({"role": "assistant", "content": initial_message})
+        st.rerun()
