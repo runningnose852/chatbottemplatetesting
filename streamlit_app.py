@@ -31,7 +31,10 @@ def truncate_to_word_limit(text, limit=300):
     words = re.findall(r'\b\w+\b|\S', text)
     if len(words) <= limit:
         return text
-    
+# Helper function to clean bold/heading markdown
+def clean_response(text):
+    return re.sub(r"[#*_`]", "", text)  # removes common Markdown formatting
+
     # Truncate to word limit
     truncated_text = " ".join(words[:limit])
     # Add ellipsis to indicate truncation
@@ -141,7 +144,7 @@ if message_count < 20:
                                                 full_response += content
                                                 # Display maximum 300 words as we go
                                                 display_response = truncate_to_word_limit(full_response)
-                                                message_placeholder.markdown(display_response + "▌")
+                                                message_placeholder.write(display_response + "▌")
                                     except json.JSONDecodeError:
                                         continue
                         
@@ -151,7 +154,7 @@ if message_count < 20:
                             st.info("The assistant's response was truncated to 300 words.")
                         
                         # Update the placeholder with the final response
-                        message_placeholder.markdown(final_response)
+                        message_placeholder.write(final_response)
                         
                         # Store the truncated response
                         st.session_state.messages.append({"role": "assistant", "content": final_response})
