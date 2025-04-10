@@ -50,7 +50,7 @@ When reviewing a student's paraphrased text:
 Be encouraging but honest. Focus on helping the student improve their paraphrasing skills."""
 
 # Initial paraphrasing task message
-initial_message = """**Paraphrasing Task:** Read the paragraph below and rewrite it in your own words. Try to maintain the original meaning, but use different sentence structures and vocabulary.
+initial_message = """**Paraphrasing Task:** Please read the paragraph below and rewrite it in your own words. Try to maintain the original meaning, but use different sentence structures and vocabulary.
 
 **Original Paragraph:** *In today's fast-paced world, technology plays a crucial role in almost every aspect of our lives. From communication and transportation to healthcare and education, advancements in technology have significantly improved the way we live and work. However, while these innovations offer many benefits, they also raise concerns about privacy, job displacement, and the overreliance on digital tools. It is important for individuals and societies to find a balance between embracing technology and maintaining control over how it affects our daily lives.*
 
