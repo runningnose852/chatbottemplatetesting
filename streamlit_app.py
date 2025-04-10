@@ -139,9 +139,12 @@ if message_count < 20:
                                     try:
                                         chunk = json.loads(json_str)
                                         if "choices" in chunk and len(chunk["choices"]) > 0:
-                                            content = chunk["choices"][0].get("delta", {}).get("content", "")
-                                            if content:
+                                       content = chunk["choices"][0].get("delta", {}).get("content")
+                                            if content is not None:
                                                 full_response += content
+                                                display_response = truncate_to_word_limit(full_response)
+                                                message_placeholder.markdown(clean_response(display_response) + "▌")
+
                                                 # Display maximum 300 words as we go
                                                 display_response = truncate_to_word_limit(full_response)
                                                 message_placeholder.write(display_response + "▌")
